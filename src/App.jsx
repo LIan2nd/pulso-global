@@ -7,6 +7,7 @@ import Technology from "./pages/news/technology"
 import Health from "./pages/news/health"
 import Science from "./pages/news/Science"
 import Business from "./pages/news/Business"
+import NotFound from "./pages/NotFound"
 
 function App() {
 
@@ -23,6 +24,8 @@ function App() {
 
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   )
