@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router"
-import Home from "./pages/home"
+import Home from "./pages/Home"
 import Login from "./pages/auth/login"
 import Register from "./pages/auth/register"
 import HomeLayout from "./Layout/HomeLayout"
@@ -8,6 +8,7 @@ import Health from "./pages/news/health"
 import Science from "./pages/news/Science"
 import Business from "./pages/news/Business"
 import NotFound from "./pages/NotFound"
+import Detail from "./pages/news/Detail"
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
           <Route path='/health' element={<Health />} />
           <Route path='/science' element={<Science />} />
           <Route path='/business' element={<Business />} />
+          <Route path='/news/:slug' element={<Detail />} />
         </Route>
 
         <Route path='/login' element={<Login />} />

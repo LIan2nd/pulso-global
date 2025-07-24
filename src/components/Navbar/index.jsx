@@ -78,7 +78,7 @@ const Navbar = () => {
           <img
             src={Logo}
             alt="Logo Pulso Global"
-            className='w-16 h-14 md:w-[100px] md:h-[90px]'
+            className='w-16 h-14 object-cover object-left md:w-[100px] md:h-[90px]'
             draggable='false'
           />
         </div>

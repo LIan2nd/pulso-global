@@ -21,7 +21,7 @@ const GetTopHeadlines = async (category) => {
   }
 }
 
-const GetLatestNews = async (query) => {
+const GetEverythingNews = async (query) => {
   try {
     const response = await API.get('/everything', {
       params: {
@@ -38,4 +38,4 @@ const GetLatestNews = async (query) => {
   }
 }
 
-export { GetTopHeadlines, GetLatestNews };
+export { GetTopHeadlines, GetEverythingNews };

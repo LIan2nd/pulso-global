@@ -5,6 +5,8 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import HeroLoading from './loading';
 import Error from './error';
 import Empty from './empty';
+import createSlug from '../../utils/createSlug';
+import { Link } from 'react-router';
 
 const Hero = ({ category }) => {
   const [articles, setArticles] = useState([]);
@@ -23,7 +25,15 @@ const Hero = ({ category }) => {
       try {
         const response = await GetTopHeadlines(category);
         if (response.articles && response.articles.length > 0) {
-          setArticles(response.articles);
+          const filteredArticles = response.articles.filter(article =>
+            article &&
+            article.title &&
+            article.title !== '[Removed]' &&
+            article.url &&
+            article.urlToImage !== null &&
+            article.content !== null
+          );
+          setArticles(filteredArticles);
         } else {
           setArticles([]);
           setError("No articles found for this category.");
@@ -66,11 +76,13 @@ const Hero = ({ category }) => {
   const {
     author = 'Unknown Author',
     title = 'Untitled Article',
+    url,
     urlToImage,
     publishedAt,
-    url
+    content,
   } = firstArticle;
 
+  const detailUrl = createSlug(title);
   const backgroundImage = urlToImage
     ? `url(${urlToImage})`
     : `linear-gradient(to right, #111, #333)`;
@@ -94,27 +106,21 @@ const Hero = ({ category }) => {
               {category}
             </p>
 
-            {url ? (
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block group"
-              >
-                <h1 className="text-3xl md:text-5xl font-bold group-hover:text-gray-200 leading-tight transition-colors duration-200">
-                  {title}
-                </h1>
-              </a>
-            ) : (
-              <h1 className="text-3xl md:text-5xl font-bold leading-tight">
+            <Link
+              to={`/news/${detailUrl}`}
+              rel="noopener noreferrer"
+              className="block group"
+              state={{ article: { urlToImage, category, title, url, detailUrl, publishedAt, author, content } }}
+            >
+              <h1 className="text-3xl md:text-5xl font-bold group-hover:text-gray-200 leading-tight transition-colors duration-200">
                 {title}
               </h1>
-            )}
+            </Link>
 
             <p className="mt-4 text-gray-200 text-sm">
               {publishedAt ? (
                 <>
-                  {formatDate(publishedAt)} | By {author}
+                  {formatDate(publishedAt)} | By {author || "Unknown Author"}
                 </>
               ) : (
                 `By ${author}`

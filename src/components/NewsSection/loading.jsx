@@ -7,7 +7,7 @@ const NewsSectionLoading = () => {
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 py-12">
       {/* Large news skeleton */}
       <div className="h-full w-full">
-        <div className=" rounded-lg overflow-hidden">
+        <div className="bg-gray-50 overflow-hidden">
           <Skeleton height={300} />
           <div className="p-6">
             <Skeleton width={80} height={20} className="mb-2" />
@@ -20,7 +20,7 @@ const NewsSectionLoading = () => {
       {/* Small news skeletons */}
       <div className="grid gap-4">
         {[...Array(3)].map((_, index) => (
-          <div key={index} className="flex gap-4 p-4 rounded-lg">
+          <div key={index} className="flex gap-4 p-4 bg-gray-50">
             <Skeleton width={120} height={80} />
             <div className="flex-1">
               <Skeleton width={60} height={16} className="mb-2" />

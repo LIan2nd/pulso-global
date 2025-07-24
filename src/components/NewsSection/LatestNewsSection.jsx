@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { GetLatestNews } from '../../_services/newsApi';
+import { GetEverythingNews } from '../../_services/newsApi';
 import { LargeNews, News } from '../News';
 import HeaderSection from './HeaderSection';
 import { FaExclamationTriangle } from 'react-icons/fa';
 import NewsSectionError from './error';
 import NewsSectionLoading from './loading';
 import NewsSectionEmpty from './empty';
+import createSlug from '../../utils/createSlug';
 
 const LatestNewsSection = () => {
   const [latestNews, setLatestNews] = useState([]);
@@ -18,7 +19,7 @@ const LatestNewsSection = () => {
       setError(null);
 
       try {
-        const response = await GetLatestNews();
+        const response = await GetEverythingNews();
 
         if (response && response.articles) {
           // Filter out articles with missing essential data
@@ -26,7 +27,9 @@ const LatestNewsSection = () => {
             article &&
             article.title &&
             article.title !== '[Removed]' &&
-            article.url
+            article.url &&
+            article.urlToImage !== null &&
+            article.content !== null
           );
 
           setLatestNews(validArticles);
@@ -46,7 +49,7 @@ const LatestNewsSection = () => {
   }, []);
 
   return (
-    <section className='p-12 lg:p-32 xl:p-42'>
+    <section className='p-4 md:px-12 lg:px-32 lg:py-12 xl:py-24 xl:px-42'>
       <HeaderSection title={"Latest News"} />
 
       {/* Loading State */}
@@ -60,16 +63,18 @@ const LatestNewsSection = () => {
 
       {/* Success State - News Content */}
       {!loading && !error && latestNews.length > 0 && (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 py-12">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
           {/* Large News Article */}
           <div className="h-full w-full row-span-3">
             <LargeNews
-              img={latestNews[0].urlToImage}
+              urlToImage={latestNews[0].urlToImage}
               title={latestNews[0].title}
               category={"Latest"}
               publishedAt={latestNews[0].publishedAt}
+              detailUrl={createSlug(latestNews[0].title)}
               url={latestNews[0].url}
               author={latestNews[0].author}
+              content={latestNews[0].content}
             />
           </div>
 
@@ -78,12 +83,14 @@ const LatestNewsSection = () => {
             {latestNews.slice(1).map((news, i) => (
               <div key={`${news.url}-${i}`}>
                 <News
-                  img={news.urlToImage}
+                  urlToImage={news.urlToImage}
                   title={news.title}
                   category={"Latest"}
                   publishedAt={news.publishedAt}
+                  detailUrl={createSlug(news.title)}
                   url={news.url}
                   author={news.author}
+                  content={news.content}
                 />
               </div>
             ))}
