@@ -6,11 +6,12 @@ const API = axios.create({
   baseURL: NEWS_API_URL,
 });
 
-const GetTopHeadlines = async (category) => {
+const GetTopHeadlines = async (category, q) => {
   try {
     const response = await API.get('/top-headlines', {
       params: {
-        category: category || 'general',
+        category,
+        q,
         apiKey: API_KEY,
       },
     });
@@ -21,13 +22,15 @@ const GetTopHeadlines = async (category) => {
   }
 }
 
-const GetEverythingNews = async (query) => {
+const GetEverythingNews = async (query, size) => {
+  size = size || 4; // Default to 100 if size is not provided
+  query = query || 'latest'; // Default to 'latest' if query is not provided
   try {
     const response = await API.get('/everything', {
       params: {
-        q: query || 'latest',
+        q: query,
         sortBy: "publishedAt",
-        pageSize: 4,
+        pageSize: size,
         apiKey: API_KEY,
       },
     });

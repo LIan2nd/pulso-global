@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router';
-import { FaMagnifyingGlass, FaBars } from "react-icons/fa6";
-import { FaTimes } from "react-icons/fa";
+import { Link, useNavigate } from 'react-router';
+import { FaMagnifyingGlass, FaBars, FaUser, FaArrowDown } from "react-icons/fa6";
+import { FaSignOutAlt, FaTimes } from "react-icons/fa";
 import Logo from '../../assets/logo.png';
+import { useAuth } from '../../contexts/AuthContext';
+import { BiChevronDown } from 'react-icons/bi';
+import UserDropdown from './UserDropdown';
 
 const Navbar = () => {
   const [openSearch, setOpenSearch] = useState(false);
@@ -10,6 +13,8 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const searchRef = useRef(null);
   const mobileMenuRef = useRef(null);
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const toggleOpenSearch = () => {
     setOpenSearch(!openSearch);
@@ -31,7 +36,9 @@ const Navbar = () => {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      console.log('Searching for:', searchQuery);
+      navigate(`/search?q=${searchQuery.trim()}`);
+      setSearchQuery('');
+      setMobileMenuOpen(false);
     }
   };
 
@@ -136,12 +143,11 @@ const Navbar = () => {
         </div>
 
         <div className='flex items-center gap-4'>
-          <button className='hidden md:block hover:text-gray-300 transition-colors duration-200 text-sm xl:text-base'>
-            Log In
-          </button>
+
+          <UserDropdown isAuthenticated={isAuthenticated} logout={logout} />
 
           <div ref={searchRef} className={`relative transition-all duration-300 ease-in-out ${openSearch ? 'w-48 md:w-64' : 'w-10'
-            }`}>
+            } hidden md:block`}>
             <form
               onSubmit={handleSearchSubmit}
               className={`flex items-center transition-all duration-300 ease-in-out ${openSearch ? 'bg-white/20 backdrop-blur-md px-4 py-2 rounded-full' : ''
@@ -223,13 +229,16 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-
-              <button
-                className='block w-full text-left text-lg font-medium hover:text-gray-300 transition-colors duration-200 py-2 border-b border-white/10'
-                onClick={closeMobileMenu}
-              >
-                Log In
-              </button>
+              {isAuthenticated ? (
+                <></>
+              ) : (
+                <button
+                  className='block w-full text-left text-lg font-medium hover:text-gray-300 transition-colors duration-200 py-2 border-b border-white/10'
+                  onClick={closeMobileMenu}
+                >
+                  Log In
+                </button>
+              )}
             </nav>
 
             <div className='mt-8 pt-6 '>

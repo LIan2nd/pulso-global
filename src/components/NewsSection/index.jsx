@@ -42,8 +42,8 @@ const NewsSection = ({ category }) => {
           setError("No articles found for this category.");
         }
       } catch (err) {
-        console.error("Failed to fetch headline:", err);
-        setError("Failed to load headlines. Please try again.");
+        console.error("Failed to fetch article:", err);
+        setError("Failed to load articles. Please try again.");
       } finally {
         setLoading(false);
         setCurrentPage(1);
@@ -95,7 +95,7 @@ const NewsSection = ({ category }) => {
             if (page >= 1 && page <= totalPages) {
               const articlesSection = document.querySelector('#articles');
               setCurrentPage(page);
-              articlesSection.scrollIntoView({ block: "start", behavior: 'smooth' }); // scroll ke atas saat ganti halaman
+              articlesSection.scrollIntoView({ block: "start", behavior: 'smooth' });
             }
           }}
         />

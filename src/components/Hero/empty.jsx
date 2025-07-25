@@ -8,7 +8,7 @@ const Empty = () => {
     >
       <div className='text-center space-y-4'>
         <h2 className='text-2xl font-bold'>No Articles Available</h2>
-        <p className='text-gray-300'>There are no articles to display for this category.</p>
+        <p className='text-gray-300'>There are no articles to display.</p>
       </div>
     </section>
   )

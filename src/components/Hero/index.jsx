@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { GetTopHeadlines } from '../../_services/newsApi';
+import { GetEverythingNews, GetTopHeadlines } from '../../_services/newsApi';
 import formatDate from '../../utils/formatDate';
 import 'react-loading-skeleton/dist/skeleton.css';
 import HeroLoading from './loading';
@@ -8,10 +8,12 @@ import Empty from './empty';
 import createSlug from '../../utils/createSlug';
 import { Link } from 'react-router';
 
-const Hero = ({ category }) => {
+const Hero = ({ category, q, everyting }) => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  category = category || "general";
+  q = q || "";
 
   useEffect(() => {
     if (!category) {
@@ -23,7 +25,12 @@ const Hero = ({ category }) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await GetTopHeadlines(category);
+        let response
+        if (!everyting) {
+          response = await GetTopHeadlines(category, q);
+        } else {
+          response = await GetEverythingNews(q);
+        }
         if (response.articles && response.articles.length > 0) {
           const filteredArticles = response.articles.filter(article =>
             article &&
@@ -36,7 +43,7 @@ const Hero = ({ category }) => {
           setArticles(filteredArticles);
         } else {
           setArticles([]);
-          setError("No articles found for this category.");
+          setError("No articles found.");
         }
       } catch (err) {
         console.error("Failed to fetch headline:", err);
@@ -47,7 +54,7 @@ const Hero = ({ category }) => {
     };
 
     fetchData();
-  }, [category]);
+  }, [category, q]);
 
   const firstArticle = articles.length > 0 ? articles[0] : null;
 

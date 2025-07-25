@@ -1,8 +1,19 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaExclamationTriangle, FaArrowLeft, FaSearch } from 'react-icons/fa';
 
 const NotFound = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${searchQuery.trim()}`);
+      setSearchQuery('');
+      setMobileMenuOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex flex-col items-center justify-center p-6 text-center">
       <div className="max-w-md mx-auto space-y-8">
@@ -40,16 +51,21 @@ const NotFound = () => {
           <p className="text-gray-300 mb-4">
             Looking for something specific?
           </p>
-          <div className="flex gap-2">
+          <form
+            onSubmit={handleSearchSubmit}
+            className='flex gap-2'
+          >
             <input
               type="text"
               placeholder="Search articles..."
               className="flex-1 px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none "
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg transition-colors duration-200">
               <FaSearch />
             </button>
-          </div>
+          </form>
         </div>
       </div>
     </div>
