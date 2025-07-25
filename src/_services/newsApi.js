@@ -1,71 +1,38 @@
-// File: services/newsApi.js
 import axios from 'axios';
 
-// Configure axios instance with default settings
 const API = axios.create({
-  baseURL: '/api', // Points to your Vercel serverless function
-  timeout: 10000, // 10 second timeout
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
+  baseURL: '/api',
+  timeout: 10000
 });
 
-const GetTopHeadlines = async (category, q = '') => {
+/**
+ * Format parameters to remove undefined or empty values.
+ * This helps in avoiding unnecessary API calls with invalid parameters.
+ */
+const formatParams = (params) => {
+  return Object.fromEntries(
+    Object.entries(params).filter(([_, v]) => v !== undefined && v !== '')
+  );
+};
+
+export const GetTopHeadlines = async (category, q) => {
   try {
     const response = await API.get('/getNews', {
-      params: {
+      params: formatParams({
         endpoint: 'top-headlines',
-        category: category || 'general', // Default to general news
+        category: category || 'general',
         q,
-        pageSize: 20 // Limit number of results
-      }
+        pageSize: 20
+      })
     });
 
-    // Validate response structure
     if (!response.data?.articles) {
-      throw new Error('Invalid API response structure');
+      throw new Error('Invalid response structure');
     }
 
     return response.data;
   } catch (error) {
-    console.error('Failed to fetch headlines:', error);
-
-    // Throw user-friendly error
-    const errorMessage = error.response?.data?.message ||
-      error.message ||
-      'Failed to load news headlines';
-    throw new Error(errorMessage);
+    console.error('News fetch error:', error);
+    throw new Error(error.response?.data?.error || 'Failed to load headlines');
   }
 };
-
-const GetEverythingNews = async (query = 'latest', size = 4) => {
-  try {
-    const response = await API.get('/getNews', {
-      params: {
-        endpoint: 'everything',
-        q: query,
-        sortBy: 'publishedAt',
-        pageSize: size,
-        language: 'en' // Filter by English articles
-      }
-    });
-
-    // Validate response structure
-    if (!response.data?.articles) {
-      throw new Error('Invalid API response structure');
-    }
-
-    return response.data;
-  } catch (error) {
-    console.error('Failed to fetch news:', error);
-
-    // Throw user-friendly error
-    const errorMessage = error.response?.data?.message ||
-      error.message ||
-      'Failed to load news articles';
-    throw new Error(errorMessage);
-  }
-};
-
-export { GetTopHeadlines, GetEverythingNews };
