@@ -237,6 +237,14 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
+              {!isAuthenticated && (
+
+                <Link className='block text-lg font-medium hover:text-gray-300 transition-colors duration-200 py-2 border-b border-white/10'
+                  to={'/login'}
+                >
+                  Log In
+                </Link>
+              )}
             </nav>
 
             {/* Mobile Search */}
