@@ -1,74 +1,87 @@
-# Pulso Global 🌎
+# Pulso Global 🌐
 
-Pulso Global is a modern news web application that provides the latest headlines from around the world. It is built with React and Vite, styled with Tailwind CSS, and fetches live news data from the NewsAPI.org service.
+![Pulso Global Banner](https://github.com/user-attachments/assets/cb162487-9962-4348-8aec-81f3f89fd612) **Pulso Global** is a modern news portal designed to deliver the latest news from around the world through a clean, fast, and responsive interface. Users can browse news by category, perform searches, and create an account for a more personalized experience.
 
-## 📜 Project Description
+**[Live Demo](https://pulso-global.vercel.app/)** ---
 
-Pulso Global is your daily source for essential world news. We deliver breaking headlines and in-depth stories across key sectors including **Business**, **Technology**, **Health**, and **Science**, ensuring you're always connected to the events shaping our planet. All content is sourced in real-time from the **NewsAPI.org** service to provide a wide and credible range of information.
+## ✨ Key Features
 
-This project was created as a technical test submission.
-
----
-
-## ✨ Features
-
-* **Categorized News:** Browse news by specific categories: Business, Technology, Health, and Science.
-* **Dynamic Search:** Search for any topic and get relevant articles from across the globe.
-* **Responsive Design:** A clean and functional user interface that works seamlessly on desktop, tablet, and mobile devices.
-* **Mock Authentication:** A simple, front-end only user authentication system (Register, Login, Logout) using `localStorage`.
-* **Dynamic Pages:** Detail pages for each article and a personalized user profile page.
+-   **News by Category**: Browse news across various categories such as Technology, Health, Science, and Business.
+-   **Powerful Search**: Find specific news articles with a robust search functionality.
+-   **User Authentication**: Secure registration and login system using localstorage (lol).
+-   **User Profile Page**: Logged-in users can view their profile page.
+-   **Responsive Design**: Optimal viewing experience across a wide range of devices, from desktop to mobile, built with Tailwind CSS & DaisyUI.
+-   **Secure API Handling**: The API key for the news service is secured on the backend using Vercel Serverless Functions, never exposing it to the client.
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 Tech Stack
 
-* **Front-End:** [React](https://reactjs.org/) (with Vite)
-* **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-* **Routing:** [React Router](https://reactrouter.com/)
-* **State Management:** React Hooks (useState, useContext, useEffect)
-* **Data Fetching:** [Axios](https://axios-http.com/)
-* **API:** [NewsAPI.org](https://newsapi.org/)
+This project is built with the following core technologies:
+
+### Frontend
+-   **React.js**: A JavaScript library for building user interfaces.
+-   **Vite**: A next-generation build tool that provides an extremely fast development experience.
+-   **React Router DOM**: For client-side routing.
+-   **Tailwind CSS**: A utility-first CSS framework for rapid and custom UI design.
+-   **Axios**: A promise-based HTTP client for making API calls.
+
+### Backend & Infrastructure
+-   **Vercel**: The hosting platform for deployment.
+-   **Vercel Serverless Functions**: Serves as a backend proxy to secure calls to the NewsAPI.
+-   **NewsAPI**: As the data source for news articles.
 
 ---
 
-## 🚀 Getting Started
+## 🛠️ Getting Started
 
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+Follow these steps to set up and run the project in your local environment.
 
 ### Prerequisites
 
-Make sure you have [Node.js](https://nodejs.org/) (version 18.x or higher) and [npm](https://www.npmjs.com/) installed on your machine.
+-   [Node.js](https://nodejs.org/en/) (v16 or later)
+-   npm or yarn
+-   An API Key from [NewsAPI](https://newsapi.org/).
 
-### Installation & Setup
+### Installation
 
-1.  **Clone the repository:**
+1.  **Clone this repository:**
     ```bash
     git clone https://github.com/LIan2nd/pulso-global.git
-    ```
-
-2.  **Navigate to the project directory:**
-    ```bash
     cd pulso-global
     ```
 
-3.  **Install dependencies:**
+2.  **Install all dependencies:**
     ```bash
     npm install
+    # or
+    yarn install
     ```
 
-4.  **Set up environment variables:**
-    * Create a new file named `.env` in the root of your project directory.
-    * Add your NewsAPI.org API key to this file. You can get a free key from [newsapi.org](https://newsapi.org/register).
-
+3.  **Set up Environment Variables:**
+    Create a `.env` or copy a `.env.example` file in the project root and use the format below. Fill it with your own credentials.
     ```env
-    VITE_NEWS_API_KEY=YOUR_API_KEY_HERE
+    # API Key from NewsAPI.org
+    VITE_NEWS_API_KEY="YOUR_NEWS_API_KEY"
     ```
 
-5.  **Run the development server:**
+4.  **Run the development server:**
     ```bash
     npm run dev
     ```
-    The application will be running on `http://localhost:5173` (or another port if 5173 is in use).
+    The application will be available at `http://localhost:5173` (or another available port).
+
+---
+
+## 🚀 Deployment
+
+This project is designed to be easily deployed on [Vercel](https://vercel.com/). Simply connect your GitHub repository to Vercel, configure the Environment Variables in the project settings, and Vercel will automatically handle the build and deployment process.
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
