@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 // Create Auth Context
 const AuthContext = createContext();
@@ -18,137 +18,140 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
-  // Check if user is logged in on app start
+  // Check auth status on mount
   useEffect(() => {
-    checkAuthStatus();
+    const initializeAuth = async () => {
+      try {
+        const currentUser = localStorage.getItem('currentUserData');
+        const rememberMe = localStorage.getItem('rememberMe') === 'true';
+
+        if (currentUser && rememberMe) {
+          const userData = JSON.parse(currentUser);
+          setUser(userData);
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        localStorage.removeItem('currentUserData');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
-  const checkAuthStatus = () => {
+  // Helper function to safely parse localStorage data
+  const getLocalStorageData = (key, defaultValue = []) => {
     try {
-      const currentUser = localStorage.getItem('currentUserData');
-
-      if (currentUser) {
-        const userData = JSON.parse(currentUser);
-        setUser(userData);
-        setIsAuthenticated(true);
-      }
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : defaultValue;
     } catch (error) {
-      console.error('Error checking auth status:', error);
-    } finally {
-      setIsLoading(false);
+      console.error(`Error parsing ${key}:`, error);
+      return defaultValue;
     }
   };
 
-  // Register function
+  // Register new user
   const register = async (userData) => {
     try {
       setIsLoading(true);
 
-      // Check if email already exists
-      const existingUsers = JSON.parse(localStorage.getItem('usersData') || '[]');
-      if (existingUsers.some(user => user.email === userData.email.toLowerCase().trim())) {
-        throw new Error('This email is already registered');
+      // Normalize and validate input
+      const email = userData.email.toLowerCase().trim();
+      const password = userData.password.trim();
+      const firstName = userData.firstName.trim();
+      const lastName = userData.lastName.trim();
+
+      if (!email || !password || !firstName || !lastName) {
+        throw new Error('All fields are required');
       }
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Check for existing user
+      const existingUsers = getLocalStorageData('usersData');
+      const emailExists = existingUsers.some(user => user.email === email);
 
-      // Create new user object
+      if (emailExists) {
+        throw new Error('Email already registered');
+      }
+
+      // Create new user (in a real app, passwords should be hashed server-side)
       const newUser = {
         id: Date.now().toString(),
-        firstName: userData.firstName.trim(),
-        lastName: userData.lastName.trim(),
-        email: userData.email.toLowerCase().trim(),
-        phone: userData.phone.trim(),
-        dateOfBirth: userData.dateOfBirth,
-        passwordHash: btoa(userData.password), // Simple encoding for demo
+        firstName,
+        lastName,
+        email,
+        phone: userData.phone?.trim() || '',
+        dateOfBirth: userData.dateOfBirth || '',
+        passwordHash: btoa(password), // Simple encoding for demo ONLY
         registeredAt: new Date().toISOString(),
       };
 
-      // Add new user to existing users
-      const updatedUsers = [...existingUsers, newUser];
-      localStorage.setItem('usersData', JSON.stringify(updatedUsers));
-
-      // Set current user (auto login after registration)
+      // Update storage
+      localStorage.setItem('usersData', JSON.stringify([...existingUsers, newUser]));
       localStorage.setItem('currentUserData', JSON.stringify(newUser));
       localStorage.setItem('rememberMe', 'true');
 
+      // Update state
       setUser(newUser);
       setIsAuthenticated(true);
+      navigate('/'); // Redirect after registration
 
-      return { success: true, user: newUser };
+      return { success: true };
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error('Registration error:', error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Login function
+  // User login
   const login = async (email, password, rememberMe = false) => {
     try {
       setIsLoading(true);
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Normalize input
+      email = email.toLowerCase().trim();
+      password = password.trim();
 
-      // Get all users from localStorage
-      const existingUsers = JSON.parse(localStorage.getItem('usersData') || '[]');
+      // Find user
+      const existingUsers = getLocalStorageData('usersData');
+      const user = existingUsers.find(u => u.email === email);
 
-      // Find user by email
-      const foundUser = existingUsers.find(
-        user => user.email === email.toLowerCase().trim()
-      );
-      const storedPassword = atob(foundUser.passwordHash);
-
-      if (!foundUser || storedPassword !== password) {
-        throw new Error('Email or Password is wrong');
+      if (!user || atob(user.passwordHash) !== password) {
+        throw new Error('Invalid email or password');
       }
 
-      // Update last login
-      const updatedUser = {
-        ...foundUser,
-        lastLoginAt: new Date().toISOString()
-      };
-
-      // Update user in the users array
-      const updatedUsers = existingUsers.map(user =>
-        user.id === foundUser.id ? updatedUser : user
-      );
-      localStorage.setItem('usersData', JSON.stringify(updatedUsers));
-
-      // Set current user session
-      localStorage.setItem('currentUserData', JSON.stringify(updatedUser));
+      // Update storage
+      localStorage.setItem('currentUserData', JSON.stringify(user));
       localStorage.setItem('rememberMe', rememberMe.toString());
 
-      setUser(updatedUser);
+      // Update state
+      setUser(user);
       setIsAuthenticated(true);
+      navigate('/'); // Redirect after login
 
-      return { success: true, user: updatedUser };
+      return { success: true };
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Login error:', error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Logout function
+  // User logout
   const logout = () => {
     localStorage.removeItem('currentUserData');
-    localStorage.removeItem('rememberMe');
     setUser(null);
     setIsAuthenticated(false);
+    navigate('/login'); // Redirect to login page
   };
 
-  const getUserByEmail = (email) => {
-    const existingUsers = JSON.parse(localStorage.getItem('usersData') || '[]');
-    return existingUsers.find(user => user.email === email.toLowerCase().trim());
-  };
-
-  // Context value
+  // Public context value
   const value = {
     user,
     isAuthenticated,
@@ -156,8 +159,6 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    checkAuthStatus,
-    getUserByEmail
   };
 
   return (

@@ -1,14 +1,25 @@
-import React from 'react'
-import formatDate from '../../utils/formatDate'
-import { Link } from 'react-router'
+import React from 'react';
+import { Link } from 'react-router-dom';
+import formatDate from '../../utils/formatDate';
 
-const LargeNews = ({ urlToImage, category, title, url, publishedAt, author, content, detailUrl }) => {
+// Shared Article Content Component to reduce duplication
+const ArticleContent = ({
+  title,
+  url,
+  detailUrl,
+  publishedAt,
+  author,
+  urlToImage,
+  category,
+  content,
+  titleSize = "text-xl"
+}) => {
   return (
-    <article className='w-full space-y-4 p-8 bg-gray-50 shadow-lg'>
-      <p className="text-sm font-semibold uppercase tracking-wider text-purple-600 mb-4">
-        {category}
+    <>
+      <p className="text-sm font-semibold uppercase tracking-wider text-purple-600 mb-2">
+        {category || 'General'}
       </p>
-      <img src={urlToImage} alt={`image ${title}`} />
+
       {url ? (
         <Link
           to={`/news/${detailUrl}`}
@@ -16,105 +27,135 @@ const LargeNews = ({ urlToImage, category, title, url, publishedAt, author, cont
           className="block group"
           state={{ article: { urlToImage, category, title, url, publishedAt, author, content } }}
         >
-          <h2 className="text-xl md:text-2xl font-bold group-hover:text-gray-700 leading-tight transition-colors duration-200">
+          <h2 className={`${titleSize} font-bold group-hover:text-gray-700 leading-tight transition-colors duration-200 mb-3`}>
             {title}
           </h2>
         </Link>
       ) : (
-        <h2 className="text-xl md:text-2xl font-bold leading-tight">
+        <h2 className={`${titleSize} font-bold leading-tight mb-3`}>
           {title}
         </h2>
       )}
 
-      <p className="mt-4 text-gray-800 text-sm">
+      <p className="text-gray-600 text-sm">
         {publishedAt ? (
           <>
-            {formatDate(publishedAt)} | By {author || "Anonymous"}
+            {formatDate(publishedAt)} • By {author || "Anonymous"}
           </>
         ) : (
           `By ${author || "Anonymous"}`
         )}
       </p>
-    </article>
-  )
-}
-
-const News = ({ urlToImage, category, title, url, publishedAt, author, content, detailUrl }) => {
-  return (
-    <article className='h-full w-full space-y-4 flex flex-col-reverse md:flex-row md:justify-between md:items-center md:space-x-12 bg-gray-50 shadow-lg'>
-      <div className='p-4'>
-        <p className="text-sm font-semibold uppercase tracking-wider text-purple-600 mt-4 mb-1 md:mt-0 md:mb-4">
-          {category}
-        </p>
-        {url ? (
-          <Link
-            to={`/news/${detailUrl}`}
-            rel="noopener noreferrer"
-            className="block group"
-            state={{ article: { urlToImage, category, title, url, publishedAt, author, content } }}
-          >
-            <h2 className="text-xl md:text-2xl font-bold group-hover:text-gray-700 leading-tight transition-colors duration-200">
-              {title}
-            </h2>
-          </Link>
-        ) : (
-          <h2 className="text-xl md:text-2xl font-bold leading-tight">
-            {title}
-          </h2>
-        )}
-
-        <p className="mt-4 text-gray-800 text-sm">
-          {publishedAt ? (
-            <>
-              {formatDate(publishedAt)} | By {author || "Anonymous"}
-            </>
-          ) : (
-            `By ${author || "Unknown Author"}`
-          )}
-        </p>
-      </div>
-      <img src={urlToImage} alt={`image ${title}`} className='object-cover object-center w-full md:w-[200px] h-full' />
-    </article>
-  )
-}
-
-const Article = ({ urlToImage, category, title, url, publishedAt, author, content, detailUrl }) => {
-  return (
-    <article className='h-full w-full space-y-4 bg-gray-50 shadow-lg'>
-      <img src={urlToImage} alt={`image ${title}`} className='object-cover object-center w-full h-[250px]' />
-      <div className='p-6'>
-        <p className="text-sm font-semibold uppercase tracking-wider text-purple-600 mt-4 mb-1 md:mt-0 md:mb-4">
-          {category}
-        </p>
-        {url ? (
-          <Link
-            to={`/news/${detailUrl}`}
-            rel="noopener noreferrer"
-            className="block group"
-            state={{ article: { urlToImage, category, title, url, publishedAt, author, content } }}
-          >
-            <h2 className="text-sm md:text-2xl font-bold group-hover:text-gray-700 leading-tight transition-colors duration-200">
-              {title}
-            </h2>
-          </Link>
-        ) : (
-          <h2 className="text-sm md:text-2xl font-bold leading-tight">
-            {title}
-          </h2>
-        )}
-
-        <p className="mt-4 text-gray-800 text-sm">
-          {publishedAt ? (
-            <>
-              {formatDate(publishedAt)} | By {author || "Anonymous"}
-            </>
-          ) : (
-            `By ${author || "Unknown Author"}`
-          )}
-        </p>
-      </div>
-    </article>
+    </>
   );
-}
+};
 
-export { LargeNews, News, Article }
+// Large Featured News Article
+export const LargeNews = ({
+  urlToImage,
+  category,
+  title,
+  url,
+  publishedAt,
+  author,
+  content,
+  detailUrl
+}) => (
+  <article className='w-full space-y-4 p-8 bg-gray-50 shadow-lg rounded-lg overflow-hidden'>
+    {urlToImage && (
+      <img
+        src={urlToImage}
+        alt={title}
+        className='w-full h-64 object-cover rounded-lg mb-4'
+        loading='lazy'
+      />
+    )}
+    <ArticleContent
+      title={title}
+      url={url}
+      detailUrl={detailUrl}
+      publishedAt={publishedAt}
+      author={author}
+      urlToImage={urlToImage}
+      category={category}
+      content={content}
+      titleSize="text-xl md:text-2xl"
+    />
+  </article>
+);
+
+// Horizontal News Article
+export const News = ({
+  urlToImage,
+  category,
+  title,
+  url,
+  publishedAt,
+  author,
+  content,
+  detailUrl
+}) => (
+  <article className='h-full w-full flex flex-col md:flex-row bg-gray-50 shadow-lg rounded-lg overflow-hidden'>
+    <div className='p-6 flex-1'>
+      <ArticleContent
+        title={title}
+        url={url}
+        detailUrl={detailUrl}
+        publishedAt={publishedAt}
+        author={author}
+        urlToImage={urlToImage}
+        category={category}
+        content={content}
+        titleSize="text-xl md:text-2xl"
+      />
+    </div>
+
+    {urlToImage && (
+      <div className='md:w-64 flex-shrink-0'>
+        <img
+          src={urlToImage}
+          alt={title}
+          className='w-full h-full object-cover'
+          loading='lazy'
+        />
+      </div>
+    )}
+  </article>
+);
+
+// Standard Article Card
+export const Article = ({
+  urlToImage,
+  category,
+  title,
+  url,
+  publishedAt,
+  author,
+  content,
+  detailUrl
+}) => (
+  <article className='h-full w-full bg-gray-50 shadow-lg rounded-lg overflow-hidden'>
+    {urlToImage && (
+      <img
+        src={urlToImage}
+        alt={title}
+        className='w-full h-48 object-cover'
+        loading='lazy'
+      />
+    )}
+
+    <div className='p-6'>
+      <ArticleContent
+        title={title}
+        url={url}
+        detailUrl={detailUrl}
+        publishedAt={publishedAt}
+        author={author}
+        urlToImage={urlToImage}
+        category={category}
+        content={content}
+        titleSize="text-lg md:text-xl"
+      />
+    </div>
+  </article>
+);

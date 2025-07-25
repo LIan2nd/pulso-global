@@ -8,78 +8,62 @@ import Empty from './empty';
 import createSlug from '../../utils/createSlug';
 import { Link } from 'react-router';
 
-const Hero = ({ category, q, everyting }) => {
+const Hero = ({ category = "general", q = "", everyting = false }) => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  category = category || "general";
-  q = q || "";
 
   useEffect(() => {
-    if (!category) {
-      setLoading(false);
-      return;
-    }
-
     const fetchData = async () => {
       setLoading(true);
       setError(null);
+
       try {
-        let response
-        if (!everyting) {
-          response = await GetTopHeadlines(category, q);
-        } else {
-          response = await GetEverythingNews(q);
-        }
-        if (response.articles && response.articles.length > 0) {
-          const filteredArticles = response.articles.filter(article =>
-            article &&
-            article.title &&
-            article.title !== '[Removed]' &&
-            article.url &&
-            article.urlToImage !== null &&
-            article.content !== null
-          );
+        // Fetch either top headlines or everything based on prop
+        const response = everyting
+          ? await GetEverythingNews(q)
+          : await GetTopHeadlines(category, q);
+
+        // Filter out invalid or incomplete articles
+        const filteredArticles = (response.articles || []).filter(article =>
+          article &&
+          article.title &&
+          article.title !== '[Removed]' &&
+          article.url &&
+          article.urlToImage &&
+          article.content
+        );
+
+        if (filteredArticles.length > 0) {
           setArticles(filteredArticles);
         } else {
           setArticles([]);
           setError("No articles found.");
         }
       } catch (err) {
-        console.error("Failed to fetch headline:", err);
-        setError("Failed to load headlines. Please try again.");
+        console.error("Failed to fetch news:", err);
+        setError("Failed to load news. Please try again.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [category, q]);
+  }, [category, q, everyting]);
 
-  const firstArticle = articles.length > 0 ? articles[0] : null;
+  // Get the first article to feature
+  const firstArticle = articles[0];
 
   // Handle loading state
-  if (loading) {
-    return (
-      <HeroLoading />
-    );
-  }
+  if (loading) return <HeroLoading />;
 
   // Handle error state
-  if (error) {
-    return (
-      <Error err={error} />
-    );
-  }
+  if (error) return <Error err={error} />;
 
-  // Handle no article state
-  if (!firstArticle) {
-    return (
-      <Empty />
-    );
-  }
+  // Handle no articles state
+  if (!firstArticle) return <Empty />;
 
-  // Destructure
+  // Destructure article data with fallbacks
   const {
     author = 'Unknown Author',
     title = 'Untitled Article',
@@ -89,6 +73,7 @@ const Hero = ({ category, q, everyting }) => {
     content,
   } = firstArticle;
 
+  // Generate URL slug and background style
   const detailUrl = createSlug(title);
   const backgroundImage = urlToImage
     ? `url(${urlToImage})`
@@ -96,42 +81,60 @@ const Hero = ({ category, q, everyting }) => {
 
   return (
     <section
-      id='hero'
-      className='h-screen bg-cover bg-center text-white relative'
+      id="hero"
+      className="h-screen bg-cover bg-center text-white relative"
       style={{
         backgroundImage: backgroundImage,
         backgroundPosition: 'center',
         backgroundSize: 'cover'
       }}
+      aria-label="Featured news article"
     >
-      <div className='absolute inset-0 w-full h-full bg-black/40' aria-hidden="true"></div>
+      {/* Dark overlay for better text contrast */}
+      <div
+        className="absolute inset-0 w-full h-full bg-black/40"
+        aria-hidden="true"
+      />
 
-      <div className='relative w-full h-full flex flex-col justify-center p-8 md:p-16 lg:p-24'>
+      <div className="relative w-full h-full flex flex-col justify-center p-8 md:p-16 lg:p-24">
         <div className="max-w-4xl space-y-6">
           <article>
+            {/* Category label */}
             <p className="text-sm font-semibold uppercase tracking-wider text-purple-600 mb-4">
               {category}
             </p>
 
+            {/* Article title link */}
             <Link
               to={`/news/${detailUrl}`}
               rel="noopener noreferrer"
               className="block group"
-              state={{ article: { urlToImage, category, title, url, detailUrl, publishedAt, author, content } }}
+              state={{
+                article: {
+                  urlToImage,
+                  category,
+                  title,
+                  url,
+                  detailUrl,
+                  publishedAt,
+                  author,
+                  content
+                }
+              }}
             >
               <h1 className="text-3xl md:text-5xl font-bold group-hover:text-gray-200 leading-tight transition-colors duration-200">
                 {title}
               </h1>
             </Link>
 
+            {/* Article metadata */}
             <p className="mt-4 text-gray-200 text-sm">
-              {publishedAt ? (
+              {publishedAt && (
                 <>
-                  {formatDate(publishedAt)} | By {author || "Unknown Author"}
+                  {formatDate(publishedAt)} | By {author}
                 </>
-              ) : (
-                `By ${author}`
               )}
+              {!publishedAt && `By ${author}`}
             </p>
           </article>
         </div>

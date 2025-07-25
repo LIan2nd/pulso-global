@@ -8,57 +8,78 @@ import NewsSectionEmpty from './empty';
 import createSlug from '../../utils/createSlug';
 import PaginationSection from './PaginationSection';
 
-const NewsSection = ({ category }) => {
+const NewsSection = ({ category = "general" }) => {
+  // State management
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Configuration
   const articlesPerPage = 8;
 
+  // Fetch news data when category changes
   useEffect(() => {
-    if (!category) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchData = async () => {
+    const fetchNewsData = async () => {
       setLoading(true);
       setError(null);
+
       try {
         const response = await GetTopHeadlines(category);
-        if (response.articles && response.articles.length > 0) {
-          const filteredArticles = response.articles.filter(article =>
-            article &&
-            article.title &&
-            article.title !== '[Removed]' &&
-            article.url &&
-            article.urlToImage !== null &&
-            article.content !== null
-          );
-          setNews(filteredArticles);
-        } else {
-          setNews([]);
+
+        // Filter out invalid articles
+        const validArticles = response?.articles?.filter(article => (
+          article?.title &&
+          article.title !== '[Removed]' &&
+          article.url &&
+          article.urlToImage &&
+          article.content
+        )) || [];
+
+        setNews(validArticles);
+
+        if (validArticles.length === 0) {
           setError("No articles found for this category.");
         }
       } catch (err) {
-        console.error("Failed to fetch article:", err);
+        console.error("News fetch error:", err);
         setError("Failed to load articles. Please try again.");
       } finally {
         setLoading(false);
-        setCurrentPage(1);
+        setCurrentPage(1); // Reset to first page on new data
       }
     };
 
-    fetchData();
+    fetchNewsData();
   }, [category]);
 
+  // Calculate pagination values
   const totalPages = Math.ceil(news.length / articlesPerPage);
   const startIndex = (currentPage - 1) * articlesPerPage;
   const currentArticles = news.slice(startIndex, startIndex + articlesPerPage);
 
+  /**
+   * Handles page changes with smooth scroll to top of section
+   * @param {number} page - The page number to navigate to
+   */
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      const articlesSection = document.getElementById('articles');
+      articlesSection?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
   return (
-    <section className='p-4 md:px-12 lg:px-32 lg:py-12 xl:py-24 xl:px-42' id='articles'>
+    <section
+      id="articles"
+      className="p-4 md:px-12 lg:px-32 lg:py-12 xl:py-24 xl:px-42"
+      aria-label={`${category} news section`}
+    >
+      {/* Section Header */}
       <HeaderSection title={category} />
 
       {/* Loading State */}
@@ -68,37 +89,38 @@ const NewsSection = ({ category }) => {
       {!loading && error && <NewsSectionError error={error} />}
 
       {/* Empty State */}
-      {!loading && !error && news.length === 0 && <NewsSectionEmpty />}
+      {!loading && !error && news.length === 0 && (
+        <NewsSectionEmpty message={`No ${category} articles found`} />
+      )}
 
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
-        {!loading && !error && currentArticles.length > 0 && currentArticles.map((n, i) => (
-          <Article
-            key={i}
-            urlToImage={n.urlToImage}
-            title={n.title}
-            category={category}
-            detailUrl={createSlug(n.title)}
-            url={n.url}
-            publishedAt={n.publishedAt}
-            author={n.author}
-            content={n.content}
-          />
-        ))}
-      </div>
+      {/* Articles Grid */}
+      {!loading && !error && currentArticles.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {currentArticles.map((article, index) => (
+              <Article
+                key={`${article.url}-${index}`}
+                urlToImage={article.urlToImage}
+                title={article.title}
+                category={category}
+                detailUrl={createSlug(article.title)}
+                url={article.url}
+                publishedAt={article.publishedAt}
+                author={article.author}
+                content={article.content}
+              />
+            ))}
+          </div>
 
-      {/* Pagination */}
-      {!loading && !error && news.length > 0 && (
-        <PaginationSection
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={(page) => {
-            if (page >= 1 && page <= totalPages) {
-              const articlesSection = document.querySelector('#articles');
-              setCurrentPage(page);
-              articlesSection.scrollIntoView({ block: "start", behavior: 'smooth' });
-            }
-          }}
-        />
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <PaginationSection
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
+        </>
       )}
     </section>
   );
